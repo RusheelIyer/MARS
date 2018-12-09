@@ -150,24 +150,20 @@ newtonsMethod:          # prepare a new stackframe for the subroutine
         # YOUR CODE HERE
         
         	la $a0, testPoly
-        	jal evaluatePolynomial #f12 = f(x)
-        	abs.d $f12, $f12
-        	la $s3, epsilon
-        	l.d $f2, ($s3) #f14 = epsilon
+        	l.d $f2, epsilon #f2 = epsilon
         	li $s5, 0 #s5 = n
         	lw $s6, maxRounds
-while:		c.le.d $f12, $f2
-		bc1t return
-		addi $t1, $s5, 1
-		mul $t1, $t1, 8
-		add $s4, $s2, $t1 #s4 = &x_n+1
+while:		la $a0, testPoly
+		jal evaluatePolynomial #f12 = f(x_n)
+        	abs.d $f12, $f12
+		c.le.d $f12, $f2
+		bc1t solution
 		jal evaluatePolynomial
 		mov.d $f14, $f12 #f14 = f(x_n)
 		la $a0, derivedPoly
 		jal evaluatePolynomial #f12 = f'(x_n)
-		div.d $f14, $f14, $f12 #f14 = f(x_n)-f'(x_n)
-		sub.d $f4, $f0, $f14 #f4 = x_n - f(x_n)-f'(x_n)
-		swc1 $f4, ($s4)
+		div.d $f12, $f14, $f12 #f14 = f(x_n)/f'(x_n)
+		sub.d $f0, $f0, $f12 #f0 = x_n - f(x_n)/f'(x_n) (x_n+1)
 		addi $s5, $s5, 1 #n++
 		blt $s5, $s6, continue
 		la $a0, noSolutionFound
@@ -175,11 +171,11 @@ while:		c.le.d $f12, $f2
 		b return
 continue:	b while
 
-return:		la $a0, solutionFound
+solution:	la $a0, solutionFound
 		jal printString
-		l.d $f0, ($s4)
 		mov.d $f12, $f0
 		jal printDouble
+return:
 
 # - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - 
                 # restore the old stackframe and return to the calling function
@@ -220,23 +216,26 @@ evaluatePolynomial:
         # }
 
         # YOUR CODE HERE
+        l.d $f12, null
+        li $t0, 0 #i = 0
         li $s0, 4
-        li $t0, 0 # i = 0
-        add $s2, $zero, $a0 #s2 is start address of polynomials
-loop:	bgt $t0, $s0, restore # jump to restore if i > 4
-	l.d $f10, eins # f10 = x^i
+        add $s1, $zero, $a0 #s1 = start address of polynomials
+loop:	bgt $t0, $s0, restore
+	li $t1, 8
+	mul $t1, $t1, $t0
+	add $a0, $s1, $t1 #a0 = &a0[i]
+	l.d $f10, eins #calculate x^i
 	li $t2, 1
-exp:	bgt $t2, $t0, incr # loop till >i
-	mul.d $f10, $f10, $f0
+power:	bgt $t2, $t0, incr
+	mul.d $f10, $f0, $f10 #after loop, f10 = x^i
 	addi $t2, $t2, 1
-	b exp
-incr:	mul $t1, $t0, 8
-	add $a0, $t1, $s2 # a0 = a0[i]
-	l.d $f14, ($a0)
-	mul.d $f12, $f14, $f10
+	b power
+incr:	l.d $f14, ($a0) #f14 = a0[i]
+	mul.d $f14, $f14, $f10 #f14 = a0[i] * x^i
+	add.d $f12, $f12, $f14
 	addi $t0, $t0, 1
 	b loop
-restore:
+restore:        
 
                 
 # - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ -                 
