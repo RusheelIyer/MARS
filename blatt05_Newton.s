@@ -190,7 +190,7 @@ evaluatePolynomial:
         # YOUR CODE HERE
         li $s0, 4
         li $s1, 0 # i = 0
-        move $s2, $a0
+        add $s2, $zero, $a0
 loop:	bgt $s1, $s0, restore # jump to label if i > 4
 	l.d $f10, eins # f10 = x^i
 	li $t2, 1
@@ -200,8 +200,8 @@ exp:	bgt $t2, $s1, incr # loop till >i
 	b exp
 incr:	mul $t0, $s1, 8
 	add $a0, $t0, $s2 # a0 = a0[i]
-	l.d $f1, ($a0)
-	mul.d $f2, $f1, $f10
+	l.d $f14, ($a0)
+	mul.d $f12, $f14, $f10
 	addi $s1, $s1, 1
 	b loop
 restore:
@@ -244,6 +244,29 @@ derive:
 
 
         # YOUR CODE HERE
+        
+        li $t0, 1 # i = 1
+        li $t1, 0 # i - 1
+        li $s0, 4
+        la $a1, derivedPoly
+        add $s1, $zero, $a0
+        add $s2, $zero, $a1
+        
+loopD:	bgt $t0, $s0, restoreD
+	mul $t2, $t0, 8
+	mul $t3, $t1, 8
+	add $a0, $t2, $s1 # a0 = a[i]
+	add $a1, $t3, $s2 # a1 = b[i-1]
+	mtc1.d $t0, $f0 #convert i to double
+	cvt.d.w $f0, $f0
+	l.d $f2, ($a0)
+	mul.d $f2, $f2, $f0
+	swc1 $f2, ($a1)
+	addi $t0, $t0, 1
+	addi $t1, $t1, 1
+	b loopD
+
+restoreD:
 
 # - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - 
  
