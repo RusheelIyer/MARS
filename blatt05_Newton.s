@@ -148,6 +148,38 @@ newtonsMethod:          # prepare a new stackframe for the subroutine
         # return x_(n)
 
         # YOUR CODE HERE
+        
+        	la $a0, testPoly
+        	jal evaluatePolynomial #f12 = f(x)
+        	abs.d $f12, $f12
+        	la $s3, epsilon
+        	l.d $f2, ($s3) #f14 = epsilon
+        	li $s5, 0 #s5 = n
+        	lw $s6, maxRounds
+while:		c.le.d $f12, $f2
+		bc1t return
+		addi $t1, $s5, 1
+		mul $t1, $t1, 8
+		add $s4, $s2, $t1 #s4 = &x_n+1
+		jal evaluatePolynomial
+		mov.d $f14, $f12 #f14 = f(x_n)
+		la $a0, derivedPoly
+		jal evaluatePolynomial #f12 = f'(x_n)
+		div.d $f14, $f14, $f12 #f14 = f(x_n)-f'(x_n)
+		sub.d $f4, $f0, $f14 #f4 = x_n - f(x_n)-f'(x_n)
+		swc1 $f4, ($s4)
+		addi $s5, $s5, 1 #n++
+		blt $s5, $s6, continue
+		la $a0, noSolutionFound
+		jal printString
+		b return
+continue:	b while
+
+return:		la $a0, solutionFound
+		jal printString
+		l.d $f0, ($s4)
+		mov.d $f12, $f0
+		jal printDouble
 
 # - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - 
                 # restore the old stackframe and return to the calling function
