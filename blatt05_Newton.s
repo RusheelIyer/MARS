@@ -248,20 +248,19 @@ derive:
         li $t0, 1 # i = 1
         li $t1, 0 # i - 1
         li $s0, 4
-        la $a1, derivedPoly
-        add $s1, $zero, $a0
-        add $s2, $zero, $a1
+        add $s1, $zero, $a0 #s1 = start address of polynomials
+        add $s2, $zero, $a1 #s2 = start address of derived polynomials
         
 loopD:	bgt $t0, $s0, restoreD
 	mul $t2, $t0, 8
 	mul $t3, $t1, 8
 	add $a0, $t2, $s1 # a0 = a[i]
 	add $a1, $t3, $s2 # a1 = b[i-1]
-	mtc1.d $t0, $f0 #convert i to double
+	mtc1.d $t0, $f0 #make i a double
 	cvt.d.w $f0, $f0
 	l.d $f2, ($a0)
 	mul.d $f2, $f2, $f0
-	swc1 $f2, ($a1)
+	s.d $f2, ($a1)
 	addi $t0, $t0, 1
 	addi $t1, $t1, 1
 	b loopD
