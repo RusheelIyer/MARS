@@ -189,19 +189,22 @@ evaluatePolynomial:
 
         # YOUR CODE HERE
         li $s0, 4
-loop:	bgt $t0, $s0, label # jump to label if i > 4
-	l.d $f10, eins
+        li $s1, 0 # i = 0
+        move $s2, $a0
+loop:	bgt $s1, $s0, restore # jump to label if i > 4
+	l.d $f10, eins # f10 = x^i
 	li $t2, 1
-exp:	bgt $t2, $t0, label2 # loop till >i
+exp:	bgt $t2, $s1, incr # loop till >i
 	mul.d $f10, $f10, $f0
 	addi $t2, $t2, 1
 	b exp
-label2:	move $t2, $a0($t0)
-	add $t2, $zero, a0($t0)
-	mul 0($f12), $t2, $t1
-	addi $t0, $t0, 1
+incr:	mul $t0, $s1, 8
+	add $a0, $t0, $s2 # a0 = a0[i]
+	l.d $f1, ($a0)
+	mul.d $f2, $f1, $f10
+	addi $s1, $s1, 1
 	b loop
-label:
+restore:
 
                 
 # - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ - ^ -                 
