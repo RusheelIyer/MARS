@@ -190,14 +190,15 @@ evaluatePolynomial:
         # YOUR CODE HERE
         li $s0, 4
 loop:	bgt $t0, $s0, label # jump to label if i > 4
-	li $t1, 1
+	l.d $f10, eins
 	li $t2, 1
 exp:	bgt $t2, $t0, label2 # loop till >i
-	mul $t1, $t1, $f0
+	mul.d $f10, $f10, $f0
 	addi $t2, $t2, 1
 	b exp
-label2:	add $t2, $zero, a0($t0)
-	mul $f12, $t2, $t1
+label2:	move $t2, $a0($t0)
+	add $t2, $zero, a0($t0)
+	mul 0($f12), $t2, $t1
 	addi $t0, $t0, 1
 	b loop
 label:
